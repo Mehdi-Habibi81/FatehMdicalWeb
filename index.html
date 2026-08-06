@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0F4C81">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ریسک‌سنج">
+<title>سامانه ارزیابی ریسک پزشکی</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #EEF2F6;
+    --paper: #FFFFFF;
+    --ink: #12222E;
+    --ink-soft: #5B7185;
+    --line: #DCE4EC;
+    --navy: #0F4C81;
+    --navy-deep: #0A3560;
+    --navy-tint: #E7EFF7;
+    --teal: #1B8A7C;
+    --teal-tint: #E1F3EF;
+    --amber: #C2790C;
+    --amber-tint: #FBEEDA;
+    --red: #C13E3E;
+    --red-tint: #FBE6E6;
+    --grid: #F4F7FA;
+    --radius: 16px;
+    --shadow: 0 1px 2px rgba(15,30,45,.04), 0 8px 24px -12px rgba(15,30,45,.12);
+  }
+
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0; padding:0;}
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    padding-bottom: 40px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono{ font-family: 'JetBrains Mono', monospace; direction: ltr; unicode-bidi: isolate; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  /* ===== Header ===== */
+  .topbar{
+    background: linear-gradient(160deg, var(--navy) 0%, var(--navy-deep) 100%);
+    color: #fff;
+    padding: 22px 18px 26px;
+    position: relative;
+    overflow: hidden;
+  }
+  .topbar::after{
+    content:"";
+    position:absolute; inset:0;
+    background-image: radial-gradient(circle at 85% 20%, rgba(255,255,255,.08), transparent 45%);
+    pointer-events:none;
+  }
+  .topbar .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    direction: ltr; text-align: right;
+    font-size: 11px; letter-spacing: .12em;
+    color: rgba(255,255,255,.6);
+    margin-bottom: 6px;
+  }
+  .topbar h1{
+    margin: 0 0 4px;
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: -.01em;
+  }
+  .topbar p{
+    margin:0;
+    font-size: 13px;
+    color: rgba(255,255,255,.72);
+    max-width: 34ch;
+  }
+
+  .wrap{ max-width: 560px; margin: 0 auto; padding: 0 14px; }
+
+  /* ===== Tabs ===== */
+  .tabbar{
+    display:flex;
+    gap: 6px;
+    margin: -16px 0 14px;
+    position: relative;
+    z-index: 2;
+  }
+  .tabbtn{
+    flex:1;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 11px 6px;
+    font-family:inherit;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    box-shadow: var(--shadow);
+    cursor:pointer;
+    transition: color .15s, background .15s, border-color .15s;
+  }
+  .tabbtn.active{
+    color: var(--navy);
+    background: var(--navy-tint);
+    border-color: #C9DCEF;
+  }
+  .view{ display:none; }
+  .view.active{ display:block; animation: fadein .25s ease; }
+  @keyframes fadein{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;} }
+
+  /* ===== Cards ===== */
+  .card{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px 16px 18px;
+    margin-bottom: 12px;
+  }
+  .card-head{
+    display:flex; align-items:baseline; justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--grid);
+  }
+  .card-head h2{
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--navy);
+    margin:0;
+  }
+  .card-head .tag{
+    font-family:'JetBrains Mono', monospace;
+    direction:ltr;
+    font-size: 10px;
+    color: var(--ink-soft);
+    letter-spacing: .04em;
+  }
+
+  /* ===== Form fields ===== */
+  .grid2{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .field{ margin-bottom: 12px; }
+  .field label{
+    display:block;
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-bottom: 5px;
+    font-weight: 500;
+  }
+  .field .unit{ color:#9AAAB8; font-weight:400; }
+  input[type=number], input[type=text], select{
+    width:100%;
+    font-family:inherit;
+    font-size: 15px;
+    color: var(--ink);
+    background: var(--grid);
+    border: 1.5px solid transparent;
+    border-radius: 10px;
+    padding: 11px 12px;
+    text-align: right;
+    transition: border-color .15s, background .15s;
+  }
+  input:focus, select:focus{
+    outline:none;
+    border-color: var(--navy);
+    background: #fff;
+  }
+  input::placeholder{ color:#AAB8C4; }
+  select{ appearance:none; -webkit-appearance:none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235B7185' stroke-width='2.4'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position: left 12px center; padding-left: 34px; }
+
+  .check-row{
+    display:flex; align-items:center; justify-content: flex-end;
+    gap: 8px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .check-row input{ width:16px; height:16px; accent-color: var(--navy); }
+
+  .chip-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .chip{
+    display:flex; align-items:center; justify-content: flex-end;
+    gap: 8px;
+    background: var(--grid);
+    border: 1.5px solid transparent;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .chip input{ width:16px; height:16px; accent-color: var(--navy); flex-shrink:0; }
+  .chip.on{ background: var(--navy-tint); border-color:#C9DCEF; color: var(--navy-deep); font-weight:600; }
+
+  .hint{
+    font-size: 11.5px;
+    color: var(--navy);
+    background: var(--navy-tint);
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-top: 10px;
+  }
+
+  /* ===== Buttons ===== */
+  .btnrow{ display:flex; gap:8px; margin: 4px 0 14px; }
+  button.primary{
+    flex: 2;
+    background: var(--navy);
+    color:#fff;
+    border:none;
+    border-radius: 12px;
+    padding: 14px;
+    font-family:inherit;
+    font-size: 14.5px;
+    font-weight: 700;
+    cursor:pointer;
+    box-shadow: 0 6px 18px -6px rgba(15,76,129,.5);
+    transition: background .15s, transform .1s;
+  }
+  button.primary:active{ transform: scale(.98); background: var(--navy-deep); }
+  button.secondary{
+    flex: 1;
+    background: var(--paper);
+    color: var(--navy);
+    border: 1.5px solid var(--navy);
+    border-radius: 12px;
+    padding: 14px 8px;
+    font-family:inherit;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor:pointer;
+  }
+  button.secondary:active{ background: var(--navy-tint); }
+
+  /* ===== Result rows ===== */
+  .metric-row{
+    display:flex; justify-content: space-between; align-items:center;
+    padding: 10px 4px;
+    border-bottom: 1px solid var(--grid);
+  }
+  .metric-row:last-child{ border-bottom:none; }
+  .metric-row .m-label{ font-size: 12.5px; color: var(--ink-soft); }
+  .metric-row .m-value{ font-size: 14px; font-weight: 700; }
+  .m-green{ color: var(--teal); }
+  .m-orange{ color: var(--amber); }
+  .m-red{ color: var(--red); }
+
+  /* ===== Risk dial (signature element) ===== */
+  .dial-block{ margin: 14px 0; }
+  .dial-top{ display:flex; justify-content: space-between; align-items:flex-end; margin-bottom: 6px; }
+  .dial-title{ font-size: 12.5px; color: var(--ink); font-weight:600; }
+  .dial-sub{ font-size: 10.5px; color: var(--ink-soft); margin-top:1px; }
+  .dial-figure{ text-align:left; }
+  .dial-pct{ font-family:'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; line-height:1; }
+  .dial-lvl{ font-size: 10.5px; margin-top:3px; font-weight:600; }
+  .dial-track{
+    height: 10px;
+    border-radius: 6px;
+    background: var(--grid);
+    overflow:hidden;
+    position:relative;
+  }
+  .dial-fill{
+    height:100%;
+    border-radius: 6px;
+    transition: width .6s cubic-bezier(.22,1,.36,1);
+    background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.16) 0 2px, transparent 2px 8px);
+  }
+  .dial-scale{ display:flex; justify-content:space-between; font-size:9px; color:#B7C3CD; margin-top:3px; font-family:'JetBrains Mono', monospace; }
+
+  .disclaimer{
+    background: var(--amber-tint);
+    border: 1px solid #EBD3A6;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 11.5px;
+    color: #7A4E0B;
+    margin: 6px 0 4px;
+  }
+
+  .empty-state{
+    text-align:center;
+    padding: 40px 20px;
+    color: var(--ink-soft);
+    font-size: 13px;
+  }
+  .empty-state .icon{ font-size: 30px; margin-bottom:8px; display:block; opacity:.5; }
+
+  .compare-line{
+    display:flex; align-items:center; justify-content: space-between;
+    padding: 9px 2px;
+    border-bottom: 1px solid var(--grid);
+    font-size: 12px;
+  }
+  .compare-line:last-child{ border-bottom:none; }
+  .compare-line .cl-name{ color: var(--ink-soft); flex:1; }
+  .compare-line .cl-vals{ font-family:'JetBrains Mono', monospace; direction:ltr; color: var(--ink); margin-inline: 8px; }
+  .compare-line .cl-status{ font-weight:700; font-size:11px; white-space:nowrap; }
+
+  .history-item{
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 12px 4px;
+    border-bottom: 1px solid var(--grid);
+  }
+  .history-item:last-child{ border-bottom:none; }
+  .history-item .h-date{ font-size:11.5px; color:var(--ink-soft); font-family:'JetBrains Mono',monospace; }
+  .history-item .h-risks{ display:flex; gap:10px; }
+  .history-item .h-risk{ font-size:11px; text-align:center; }
+  .history-item .h-risk b{ display:block; font-size:14px; font-family:'JetBrains Mono',monospace; }
+
+  .toast{
+    position: fixed;
+    bottom: 18px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--navy-deep);
+    color:#fff;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 10px 30px -8px rgba(0,0,0,.4);
+    opacity:0;
+    pointer-events:none;
+    transition: all .3s cubic-bezier(.22,1,.36,1);
+    z-index: 50;
+    white-space:nowrap;
+  }
+  .toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
+
+  .err{
+    background: var(--red-tint);
+    border:1px solid #EFC1C1;
+    color: var(--red);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 12.5px;
+    margin-bottom: 10px;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="eyebrow">SELF-ASSESSMENT · v1</div>
+    <h1>🩺 سامانه ارزیابی ریسک پزشکی</h1>
+    <p>بررسی آموزشی شاخص‌های سلامت و ریسک نسبی بیماری قلبی و دیابت</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="tabbar">
+    <button class="tabbtn active" data-tab="form">فرم ارزیابی</button>
+    <button class="tabbtn" data-tab="result">نتایج</button>
+    <button class="tabbtn" data-tab="history">سابقه</button>
+  </div>
+
+  <!-- ============ FORM VIEW ============ -->
+  <div class="view active" id="view-form">
+
+    <div class="card">
+      <div class="card-head"><h2>اطلاعات شخصی</h2><span class="tag">01</span></div>
+      <div class="grid2">
+        <div class="field">
+          <label>نام و نام خانوادگی</label>
+          <input type="text" id="f-name" placeholder="اختیاری">
+        </div>
+        <div class="field">
+          <label>سن <span class="unit">(سال)</span></label>
+          <input type="number" id="f-age" placeholder="مثلا ۴۰" inputmode="numeric">
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>جنسیت</label>
+          <select id="f-gender">
+            <option value="مرد">مرد</option>
+            <option value="زن">زن</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>مصرف دخانیات</label>
+          <select id="f-smoking">
+            <option value="خیر">خیر</option>
+            <option value="بله">بله</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>علائم حیاتی و اطلاعات پزشکی</h2><span class="tag">02</span></div>
+      <div class="grid2">
+        <div class="field">
+          <label>قند خون ناشتا <span class="unit">(mg/dL)</span></label>
+          <input type="number" id="f-fbs" placeholder="۹۰" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label>فشار سیستولیک <span class="unit">(mmHg)</span></label>
+          <input type="number" id="f-sys" placeholder="۱۲۰" inputmode="decimal">
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>فشار دیاستولیک <span class="unit">(mmHg)</span></label>
+          <input type="number" id="f-dia" placeholder="۸۰" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label>ضربان قلب در استراحت <span class="unit">(bpm)</span></label>
+          <input type="number" id="f-hr" placeholder="۷۲" inputmode="decimal">
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>قد <span class="unit">(سانتی‌متر)</span></label>
+          <input type="number" id="f-height" placeholder="۱۷۵" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label>وزن <span class="unit">(کیلوگرم)</span></label>
+          <input type="number" id="f-weight" placeholder="۷۵" inputmode="decimal">
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:4px;">
+        <label>HbA1c <span class="unit">(درصد) — اختیاری</span></label>
+        <input type="number" id="f-hba1c" placeholder="۵.۷" inputmode="decimal" step="0.1">
+      </div>
+      <label class="check-row">
+        <input type="checkbox" id="f-hba1c-na">
+        HbA1c در دسترس نیست؛ از مقدار مرجع استفاده شود
+      </label>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>سابقه بیماری در خانواده</h2><span class="tag">03</span></div>
+      <p style="font-size:12px; color:var(--ink-soft); margin:0 0 10px;">بیماری‌هایی که در بستگان درجه یک (پدر، مادر، خواهر یا برادر) سابقه دارند را انتخاب کنید.</p>
+      <div class="chip-grid" id="family-grid"></div>
+      <div class="hint">فقط موارد انتخاب‌شده در محاسبات ریسک اعمال می‌شوند.</div>
+    </div>
+
+    <div class="btnrow">
+      <button class="primary" id="btn-calculate">محاسبه و ذخیره اطلاعات</button>
+      <button class="secondary" id="btn-compare">📈 مقایسه با سابقه</button>
+    </div>
+  </div>
+
+  <!-- ============ RESULT VIEW ============ -->
+  <div class="view" id="view-result">
+    <div id="result-content">
+      <div class="empty-state">
+        <span class="icon">📋</span>
+        نتایج پس از تکمیل فرم و زدن دکمه «محاسبه» اینجا نمایش داده می‌شود.
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ HISTORY VIEW ============ -->
+  <div class="view" id="view-history">
+    <div class="card">
+      <div class="card-head"><h2>سوابق ثبت‌شده</h2><span class="tag" id="history-count">0</span></div>
+      <div id="history-list">
+        <div class="empty-state">
+          <span class="icon">🗂️</span>
+          هنوز سابقه‌ای ثبت نشده است.
+        </div>
+      </div>
+    </div>
+    <div class="btnrow" id="clear-history-row" style="display:none;">
+      <button class="secondary" style="flex:1; border-color:var(--red); color:var(--red);" id="btn-clear-history">پاک کردن همه سوابق</button>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    ⚠ <b>سلب مسئولیت پزشکی:</b> این برنامه صرفاً آموزشی است و بر پایه قواعد بالینی شناخته‌شده عمل می‌کند؛ نتایج آن تشخیص، درمان یا جایگزین مراجعه به پزشک نیست.
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   DATA / STORAGE
+============================================================ */
+const STORAGE_KEY = "medrisk_history_v1";
+
+function readHistory(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  }catch(e){ return []; }
+}
+function saveHistory(history){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+}
+
+/* ============================================================
+   MEDICAL BASE FUNCTIONS  (ported 1:1 from source)
+============================================================ */
+function calculateBMI(weight, heightCm){ return weight / Math.pow(heightCm/100, 2); }
+function calculateMAP(sys, dia){ return (sys + 2*dia) / 3; }
+
+function getBmiStatus(bmi){
+  if(bmi < 18.5) return ["کم‌وزن","orange"];
+  if(bmi < 25) return ["نرمال","green"];
+  if(bmi < 30) return ["اضافه‌وزن","orange"];
+  return ["چاقی","red"];
+}
+function getBloodSugarStatus(fbs){
+  if(fbs < 100) return ["نرمال","green"];
+  if(fbs < 126) return ["پیش‌دیابت","orange"];
+  return ["در محدوده خطر دیابت","red"];
+}
+function getBloodPressureStatus(sys, dia){
+  if(sys < 120 && dia < 80) return ["نرمال","green"];
+  if(sys < 130 && dia < 90) return ["بالا / پیش‌فشارخون","orange"];
+  return ["فشارخون بالا","red"];
+}
+function getHeartRateStatus(hr){
+  if(hr < 60) return ["کمتر از محدوده نرمال","orange"];
+  if(hr <= 100) return ["نرمال","green"];
+  return ["بالاتر از محدوده نرمال","orange"];
+}
+function riskColorKey(pct){ if(pct < 20) return "green"; if(pct < 50) return "orange"; return "red"; }
+function riskLabel(pct){ if(pct < 20) return "کم"; if(pct < 50) return "متوسط"; return "بالا"; }
+
+function familyRiskMultiplier(familyHistory, diseaseName){
+  return familyHistory.includes(diseaseName) ? 1.15 : 1.0;
+}
+
+/* ============================================================
+   RISK ESTIMATION — rule-based clinical scoring
+   (replaces the original scikit-learn RandomForest / HistGradientBoosting
+   models, which required training datasets not available on-device)
+============================================================ */
+function estimateCvdRisk({age, genderNumber, fbs, sys, hr, smoking, familyHistory}){
+  let score = 2; // baseline
+
+  // age
+  if(age >= 65) score += 30;
+  else if(age >= 55) score += 22;
+  else if(age >= 45) score += 13;
+  else if(age >= 35) score += 5;
+
+  // gender (male somewhat higher baseline CVD risk)
+  if(genderNumber === 0) score += 6;
+
+  // systolic BP
+  if(sys >= 160) score += 26;
+  else if(sys >= 140) score += 18;
+  else if(sys >= 130) score += 10;
+  else if(sys >= 120) score += 4;
+
+  // fasting blood sugar (binary flag as in original model)
+  if(fbs > 120) score += 10;
+
+  // resting heart rate distance from normal
+  const hrDist = hr < 60 ? 60-hr : (hr > 100 ? hr-100 : 0);
+  score += Math.min(hrDist * 0.6, 14);
+
+  // smoking
+  if(smoking === "بله") score += 14;
+
+  score *= familyRiskMultiplier(familyHistory, "بیماری قلبی‌عروقی");
+
+  return Math.round(Math.max(1, Math.min(score, 97)));
+}
+
+function estimateT2dRisk({age, genderNumber, bmi, fbs, hba1c, familyHistory}){
+  let score = 2;
+
+  if(age >= 60) score += 18;
+  else if(age >= 45) score += 12;
+  else if(age >= 35) score += 5;
+
+  if(bmi >= 35) score += 28;
+  else if(bmi >= 30) score += 20;
+  else if(bmi >= 25) score += 10;
+
+  if(fbs >= 126) score += 34;
+  else if(fbs >= 100) score += 18;
+  else if(fbs >= 90) score += 5;
+
+  if(hba1c >= 6.5) score += 30;
+  else if(hba1c >= 5.7) score += 14;
+
+  if(genderNumber === 1) score += 2;
+
+  score *= familyRiskMultiplier(familyHistory, "دیابت");
+
+  return Math.round(Math.max(1, Math.min(score, 97)));
+}
+
+function calculateScreeningRisks({age, fbs, sys, dia, bmi, familyHistory}){
+  let hypertensionScore = 5;
+  if(sys >= 140 || dia >= 90) hypertensionScore += 60;
+  else if(sys >= 130 || dia >= 85) hypertensionScore += 35;
+  else if(sys >= 120 || dia >= 80) hypertensionScore += 15;
+  if(age >= 45) hypertensionScore += 10;
+  if(bmi >= 30) hypertensionScore += 10;
+  if(familyHistory.includes("فشارخون بالا")) hypertensionScore += 15;
+
+  let obesityScore = 5;
+  if(bmi >= 35) obesityScore = 85;
+  else if(bmi >= 30) obesityScore = 70;
+  else if(bmi >= 25) obesityScore = 35;
+  else if(bmi < 18.5) obesityScore = 20;
+  if(familyHistory.includes("چاقی")) obesityScore += 10;
+
+  let prediabetesScore = 5;
+  if(fbs >= 100 && fbs < 126) prediabetesScore += 60;
+  else if(fbs >= 126) prediabetesScore += 80;
+  else if(fbs >= 90) prediabetesScore += 15;
+  if(bmi >= 25) prediabetesScore += 10;
+  if(age >= 45) prediabetesScore += 10;
+  if(familyHistory.includes("دیابت")) prediabetesScore += 15;
+
+  let kidneyScore = 5;
+  if(sys >= 140 || dia >= 90) kidneyScore += 35;
+  else if(sys >= 130 || dia >= 85) kidneyScore += 15;
+  if(fbs >= 126) kidneyScore += 25;
+  else if(fbs >= 100) kidneyScore += 10;
+  if(age >= 60) kidneyScore += 15;
+  if(familyHistory.includes("بیماری کلیوی")) kidneyScore += 20;
+
+  return {
+    "فشارخون بالا": Math.min(Math.round(hypertensionScore), 100),
+    "چاقی": Math.min(Math.round(obesityScore), 100),
+    "پیش‌دیابت": Math.min(Math.round(prediabetesScore), 100),
+    "بیماری مزمن کلیه": Math.min(Math.round(kidneyScore), 100),
+  };
+}
+
+/* ============================================================
+   UI — Family history chips
+============================================================ */
+const DISEASES = ["دیابت","بیماری قلبی‌عروقی","فشارخون بالا","بیماری کلیوی","چاقی","کم‌کاری تیروئید","پرکاری تیروئید"];
+const familyGrid = document.getElementById("family-grid");
+DISEASES.forEach((d, i)=>{
+  const label = document.createElement("label");
+  label.className = "chip";
+  label.innerHTML = `<input type="checkbox" data-disease="${d}"><span>${d}</span>`;
+  const input = label.querySelector("input");
+  input.addEventListener("change", ()=> label.classList.toggle("on", input.checked));
+  familyGrid.appendChild(label);
+});
+function getSelectedFamilyHistory(){
+  return Array.from(familyGrid.querySelectorAll("input:checked")).map(i=>i.dataset.disease);
+}
+function setFamilyHistory(list){
+  familyGrid.querySelectorAll("input").forEach(input=>{
+    const on = list.includes(input.dataset.disease);
+    input.checked = on;
+    input.closest(".chip").classList.toggle("on", on);
+  });
+}
+
+/* ============================================================
+   HbA1c toggle
+============================================================ */
+const hba1cInput = document.getElementById("f-hba1c");
+const hba1cNA = document.getElementById("f-hba1c-na");
+hba1cNA.addEventListener("change", ()=>{
+  if(hba1cNA.checked){ hba1cInput.value=""; hba1cInput.disabled = true; }
+  else{ hba1cInput.disabled = false; }
+});
+
+/* ============================================================
+   TABS
+============================================================ */
+document.querySelectorAll(".tabbtn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".tabbtn").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("view-"+btn.dataset.tab).classList.add("active");
+    if(btn.dataset.tab === "history") renderHistoryList();
+  });
+});
+function goToTab(tab){
+  document.querySelector(`.tabbtn[data-tab="${tab}"]`).click();
+}
+
+/* ============================================================
+   TOAST
+============================================================ */
+let toastTimer = null;
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.classList.remove("show"), 2200);
+}
+
+/* ============================================================
+   FORM VALIDATION
+============================================================ */
+function getNumber(id, name, min, max){
+  const raw = document.getElementById(id).value.trim();
+  const value = parseFloat(raw);
+  if(raw === "" || isNaN(value)) throw new Error(`مقدار «${name}» باید عدد باشد.`);
+  if(value < min || value > max) throw new Error(`مقدار «${name}» باید بین ${min} و ${max} باشد.`);
+  return value;
+}
+
+/* ============================================================
+   RENDER: risk dial
+============================================================ */
+function renderDial(title, sub, percent, colorKey){
+  const colorMap = { green: getComputedStyle(document.documentElement).getPropertyValue('--teal'),
+                      orange: getComputedStyle(document.documentElement).getPropertyValue('--amber'),
+                      red: getComputedStyle(document.documentElement).getPropertyValue('--red') };
+  const color = colorMap[colorKey];
+  const safe = Math.max(0, Math.min(percent, 100));
+  return `
+  <div class="dial-block">
+    <div class="dial-top">
+      <div>
+        <div class="dial-title">${title}</div>
+        ${sub ? `<div class="dial-sub">${sub}</div>` : ""}
+      </div>
+      <div class="dial-figure">
+        <div class="dial-pct" style="color:${color}">${Math.round(safe)}٪</div>
+        <div class="dial-lvl" style="color:${color}">سطح خطر: ${riskLabel(safe)}</div>
+      </div>
+    </div>
+    <div class="dial-track"><div class="dial-fill" style="width:${safe}%; background:${color};"></div></div>
+    <div class="dial-scale"><span>0</span><span>50</span><span>100</span></div>
+  </div>`;
+}
+
+/* ============================================================
+   CALCULATE
+============================================================ */
+document.getElementById("btn-calculate").addEventListener("click", ()=>{
+  const resultContent = document.getElementById("result-content");
+  try{
+    const age = getNumber("f-age", "سن", 1, 120);
+    const fbs = getNumber("f-fbs", "قند خون ناشتا", 30, 600);
+    const sys = getNumber("f-sys", "فشار سیستولیک", 50, 300);
+    const dia = getNumber("f-dia", "فشار دیاستولیک", 30, 200);
+    const hr = getNumber("f-hr", "ضربان قلب", 25, 250);
+    const height = getNumber("f-height", "قد", 50, 250);
+    const weight = getNumber("f-weight", "وزن", 10, 500);
+
+    const hba1cAvailable = !hba1cNA.checked;
+    let hba1c;
+    if(hba1cAvailable) hba1c = getNumber("f-hba1c", "HbA1c", 3, 20);
+    else hba1c = 5.7;
+
+    const genderName = document.getElementById("f-gender").value;
+    const genderNumber = genderName === "مرد" ? 0 : 1;
+    const smoking = document.getElementById("f-smoking").value;
+    const familyHistory = getSelectedFamilyHistory();
+
+    const bmi = Math.round(calculateBMI(weight, height) * 10) / 10;
+    const mapValue = Math.round(calculateMAP(sys, dia) * 10) / 10;
+
+    const [bmiStatus, bmiColor] = getBmiStatus(bmi);
+    const [sugarStatus, sugarColor] = getBloodSugarStatus(fbs);
+    const [pressureStatus, pressureColor] = getBloodPressureStatus(sys, dia);
+    const [hrStatus, hrColor] = getHeartRateStatus(hr);
+
+    const cvdRisk = estimateCvdRisk({age, genderNumber, fbs, sys, hr, smoking, familyHistory});
+    const t2dRisk = estimateT2dRisk({age, genderNumber, bmi, fbs, hba1c, familyHistory});
+    const screeningRisks = calculateScreeningRisks({age, fbs, sys, dia, bmi, familyHistory});
+
+    // ---- render results ----
+    let html = "";
+    html += `<div class="card"><div class="card-head"><h2>📋 وضعیت شاخص‌های فعلی</h2><span class="tag">NOW</span></div>`;
+    html += metricRow("BMI", `${bmi} · ${bmiStatus}`, bmiColor);
+    html += metricRow("قند خون ناشتا", `${fbs} mg/dL · ${sugarStatus}`, sugarColor);
+    html += metricRow("فشار خون", `${Math.round(sys)}/${Math.round(dia)} mmHg · ${pressureStatus}`, pressureColor);
+    html += metricRow("ضربان قلب", `${Math.round(hr)} bpm · ${hrStatus}`, hrColor);
+    html += metricRow("فشار شریانی میانگین (MAP)", `${mapValue} mmHg`, "green");
+    html += `</div>`;
+
+    html += `<div class="card"><div class="card-head"><h2>ریسک برآوردی (مبتنی بر قواعد بالینی)</h2><span class="tag">EST</span></div>`;
+    html += renderDial("ریسک بیماری قلبی‌عروقی (CVD)", null, cvdRisk, riskColorKey(cvdRisk));
+    html += renderDial("ریسک دیابت نوع ۲ (T2D)", null, t2dRisk, riskColorKey(t2dRisk));
+    if(!hba1cAvailable){
+      html += `<div class="hint" style="background:var(--amber-tint); color:#7A4E0B;">ℹ HbA1c وارد نشده بود؛ برای برآورد از مقدار مرجع 5.7٪ استفاده شد.</div>`;
+    }
+    html += `</div>`;
+
+    html += `<div class="card"><div class="card-head"><h2>🔎 غربالگری عوامل خطر</h2><span class="tag">SCR</span></div>`;
+    html += `<p style="font-size:11.5px; color:var(--ink-soft); margin:0 0 6px;">این بخش بر اساس قواعد ساده غربالگری است، نه یک مدل جداگانه.</p>`;
+    Object.entries(screeningRisks).forEach(([name, pct])=>{
+      html += renderDial(`ریسک غربالگری ${name}`, null, pct, riskColorKey(pct));
+    });
+    html += `</div>`;
+
+    html += `<div class="card"><div class="card-head"><h2>👨‍👩‍👧 سابقه خانوادگی انتخاب‌شده</h2></div>`;
+    if(familyHistory.length){
+      html += `<div class="hint" style="background:var(--amber-tint); color:#7A4E0B; font-weight:600;">${familyHistory.join("، ")}</div>`;
+    }else{
+      html += `<div class="hint" style="background:var(--teal-tint); color:#0F5C50; font-weight:600;">هیچ سابقه خانوادگی انتخاب نشده است.</div>`;
+    }
+    html += `</div>`;
+
+    html += `<div class="hint" style="background:var(--teal-tint); color:#0F5C50; font-weight:700; text-align:center; padding:12px;">✓ اطلاعات ذخیره شد. برای مقایسه با ثبت قبلی، به تب «سابقه» یا دکمه مقایسه بروید.</div>`;
+
+    resultContent.innerHTML = html;
+
+    // save record
+    const record = {
+      date: formatDate(new Date()),
+      input: { name: document.getElementById("f-name").value.trim(), age, gender: genderName, smoking, fbs, sys, dia, hr, height, weight, hba1c: hba1cAvailable ? hba1c : null, hba1c_available: hba1cAvailable, family_history: familyHistory },
+      results: { bmi, bmi_status: bmiStatus, map: mapValue, cvd_risk: cvdRisk, t2d_risk: t2dRisk, screening_risks: screeningRisks }
+    };
+    const history = readHistory();
+    history.push(record);
+    saveHistory(history);
+
+    showToast("✓ محاسبه شد و ذخیره گردید");
+    goToTab("result");
+    renderHistoryList();
+
+  }catch(err){
+    resultContent.innerHTML = `<div class="err">⚠ ${err.message}</div>`;
+    goToTab("result");
+  }
+});
+
+function metricRow(label, value, colorKey){
+  return `<div class="metric-row"><span class="m-label">${label}</span><span class="m-value m-${colorKey}">${value}</span></div>`;
+}
+
+function formatDate(d){
+  const p = n => String(n).padStart(2,"0");
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+}
+
+/* ============================================================
+   LOAD LAST RECORD INTO FORM
+============================================================ */
+function loadLastRecord(){
+  const history = readHistory();
+  if(!history.length) return;
+  const last = history[history.length-1].input;
+  if(!last) return;
+  document.getElementById("f-name").value = last.name || "";
+  document.getElementById("f-age").value = last.age ?? "";
+  document.getElementById("f-gender").value = last.gender || "مرد";
+  document.getElementById("f-smoking").value = last.smoking || "خیر";
+  document.getElementById("f-fbs").value = last.fbs ?? "";
+  document.getElementById("f-sys").value = last.sys ?? "";
+  document.getElementById("f-dia").value = last.dia ?? "";
+  document.getElementById("f-hr").value = last.hr ?? "";
+  document.getElementById("f-height").value = last.height ?? "";
+  document.getElementById("f-weight").value = last.weight ?? "";
+  if(last.hba1c_available === false){
+    hba1cNA.checked = true;
+    hba1cInput.disabled = true;
+    hba1cInput.value = "";
+  }else{
+    hba1cInput.value = last.hba1c ?? "";
+  }
+  setFamilyHistory(last.family_history || []);
+}
+loadLastRecord();
+
+/* ============================================================
+   HISTORY LIST
+============================================================ */
+function renderHistoryList(){
+  const history = readHistory();
+  const list = document.getElementById("history-list");
+  const countTag = document.getElementById("history-count");
+  const clearRow = document.getElementById("clear-history-row");
+  countTag.textContent = history.length;
+
+  if(!history.length){
+    list.innerHTML = `<div class="empty-state"><span class="icon">🗂️</span>هنوز سابقه‌ای ثبت نشده است.</div>`;
+    clearRow.style.display = "none";
+    return;
+  }
+  clearRow.style.display = "flex";
+
+  list.innerHTML = history.slice().reverse().map(rec=>{
+    const r = rec.results || {};
+    return `<div class="history-item">
+      <span class="h-date">${rec.date || "—"}</span>
+      <div class="h-risks">
+        <div class="h-risk"><span style="color:var(--ink-soft)">CVD</span><b style="color:${riskColorVar(riskColorKey(r.cvd_risk||0))}">${r.cvd_risk ?? "-"}٪</b></div>
+        <div class="h-risk"><span style="color:var(--ink-soft)">T2D</span><b style="color:${riskColorVar(riskColorKey(r.t2d_risk||0))}">${r.t2d_risk ?? "-"}٪</b></div>
+      </div>
+    </div>`;
+  }).join("");
+}
+function riskColorVar(key){
+  return key === "green" ? "var(--teal)" : key === "orange" ? "var(--amber)" : "var(--red)";
+}
+document.getElementById("btn-clear-history").addEventListener("click", ()=>{
+  if(confirm("همه سوابق ذخیره‌شده حذف شوند؟")){
+    localStorage.removeItem(STORAGE_KEY);
+    renderHistoryList();
+    showToast("سوابق حذف شد");
+  }
+});
+
+/* ============================================================
+   COMPARISON
+============================================================ */
+document.getElementById("btn-compare").addEventListener("click", showComparison);
+
+function showComparison(){
+  const history = readHistory();
+  const resultContent = document.getElementById("result-content");
+
+  if(history.length < 2){
+    resultContent.innerHTML = `<div class="err">برای مقایسه، حداقل باید دو ثبت اطلاعات داشته باشید.</div>`;
+    goToTab("result");
+    return;
+  }
+
+  const current = history[history.length-1];
+  const previous = history[history.length-2];
+
+  let html = `<div class="card">
+    <div class="card-head"><h2>مقایسه آخرین ثبت با ثبت قبلی</h2></div>
+    <div class="hint">ثبت قبلی: ${previous.date || "نامشخص"}<br>آخرین ثبت: ${current.date || "نامشخص"}</div>
+  </div>`;
+
+  try{
+    const oldR = previous.results, newR = current.results;
+    const oldI = previous.input, newI = current.input;
+
+    html += `<div class="card"><div class="card-head"><h2>📊 مقایسه ریسک‌های اصلی</h2></div>`;
+    html += compareBar("ریسک بیماری قلبی‌عروقی (CVD)", oldR.cvd_risk||0, newR.cvd_risk||0);
+    html += compareBar("ریسک دیابت نوع ۲ (T2D)", oldR.t2d_risk||0, newR.t2d_risk||0);
+    html += `</div>`;
+
+    const comparisons = [
+      ["BMI", oldR.bmi||0, newR.bmi||0, "", true],
+      ["قند خون ناشتا", oldI.fbs||0, newI.fbs||0, " mg/dL", true],
+      ["فشار سیستولیک", oldI.sys||0, newI.sys||0, " mmHg", true],
+      ["فشار دیاستولیک", oldI.dia||0, newI.dia||0, " mmHg", true],
+      ["ضربان قلب", oldI.hr||0, newI.hr||0, " bpm", false],
+      ["ریسک CVD", oldR.cvd_risk||0, newR.cvd_risk||0, "٪", true],
+      ["ریسک دیابت نوع ۲", oldR.t2d_risk||0, newR.t2d_risk||0, "٪", true],
+    ];
+
+    let totalScore = 0;
+    let rowsHtml = "";
+    comparisons.forEach(([name, before, after, unit, lowerBetter], idx)=>{
+      const {text, colorKey, score} = comparisonText(name, before, after, unit, lowerBetter);
+      totalScore += score;
+      rowsHtml += `<div class="compare-line"><span class="cl-status" style="color:${riskColorVar(colorKey)}">${text.status}</span><span class="cl-vals">${text.vals}</span><span class="cl-name">${name}</span></div>`;
+    });
+
+    html += `<div class="card"><div class="card-head"><h2>📈 تغییرات عددی نسبت به ثبت قبلی</h2></div>${rowsHtml}`;
+
+    let summary;
+    if(totalScore > 0) summary = {text:"✅ نتیجه کلی: تعدادی از شاخص‌ها نسبت به ثبت قبلی بهبود یافته‌اند.", bg:"var(--teal-tint)", fg:"#0F5C50"};
+    else if(totalScore < 0) summary = {text:"⚠ نتیجه کلی: بعضی شاخص‌ها نسبت به ثبت قبلی به توجه بیشتری نیاز دارند.", bg:"var(--red-tint)", fg:"var(--red)"};
+    else summary = {text:"➖ نتیجه کلی: تغییر محسوسی نسبت به ثبت قبلی دیده نشد.", bg:"var(--amber-tint)", fg:"#7A4E0B"};
+
+    html += `<div class="hint" style="background:${summary.bg}; color:${summary.fg}; font-weight:700; margin-top:10px; text-align:center; padding:12px;">${summary.text}</div></div>`;
+
+  }catch(e){
+    html += `<div class="err">اطلاعات لازم برای مقایسه در سوابق ذخیره‌شده پیدا نشد.</div>`;
+  }
+
+  resultContent.innerHTML = html;
+  goToTab("result");
+}
+
+function compareBar(title, before, after){
+  return `
+  <div style="margin-bottom:10px;">
+    <div style="font-size:12px; color:var(--ink-soft); margin-bottom:4px;">${title}</div>
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+      <span style="font-size:10px; color:var(--ink-soft); width:52px;">قبلی</span>
+      <div class="dial-track" style="flex:1;"><div class="dial-fill" style="width:${Math.min(before,100)}%; background:#94A3B8;"></div></div>
+      <span class="mono" style="font-size:11px; width:34px; text-align:left;">${Math.round(before)}٪</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span style="font-size:10px; color:var(--navy); width:52px;">جدید</span>
+      <div class="dial-track" style="flex:1;"><div class="dial-fill" style="width:${Math.min(after,100)}%; background:var(--navy);"></div></div>
+      <span class="mono" style="font-size:11px; width:34px; text-align:left; color:var(--navy); font-weight:700;">${Math.round(after)}٪</span>
+    </div>
+  </div>`;
+}
+
+function heartRateDistance(hr){
+  if(hr < 60) return 60-hr;
+  if(hr > 100) return hr-100;
+  return 0;
+}
+function comparisonText(name, before, after, unit, lowerBetter){
+  const diff = Math.round((after-before)*10)/10;
+  let status, colorKey, score;
+
+  if(name === "ضربان قلب"){
+    const oldDist = heartRateDistance(before), newDist = heartRateDistance(after);
+    if(newDist < oldDist){ status="بهبود"; colorKey="green"; score=1; }
+    else if(newDist > oldDist){ status="پسرفت"; colorKey="red"; score=-1; }
+    else{ status="بدون تغییر"; colorKey="orange"; score=0; }
+  }else if(diff === 0){
+    status="بدون تغییر"; colorKey="orange"; score=0;
+  }else{
+    const improved = lowerBetter ? diff < 0 : diff > 0;
+    if(improved){ status="بهبود"; colorKey="green"; score=1; }
+    else{ status="پسرفت"; colorKey="red"; score=-1; }
+  }
+  const diffText = diff > 0 ? `+${diff}` : String(diff);
+  return { text: { status, vals: `${before}${unit} → ${after}${unit} (${diffText}${unit})` }, colorKey, score };
+}
+
+/* ============================================================
+   Initial history badge
+============================================================ */
+renderHistoryList();
+</script>
+</body>
+</html>
